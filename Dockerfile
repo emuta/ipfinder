@@ -6,7 +6,7 @@ COPY ./ /go/src
 
 RUN apk update && apk add git \
     && go get github.com/ipipdotnet/datx-go \
-    && github.com/sirupsen/logrus \
+    && go get github.com/sirupsen/logrus \
     && CGO_ENABLED=0 go build -ldflags '-w -s' -o ipfinder \
     && apk del git && rm -rf /var/cache/apk
 
