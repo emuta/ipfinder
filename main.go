@@ -6,29 +6,29 @@ import (
     "net/http"
     "encoding/json"
     
-    "github.com/sirupsen/logrus"
+    log "github.com/sirupsen/logrus"
     "github.com/ipipdotnet/datx-go"
 )
 
-var addr   = flag.String("addr", ":80", "service listen address")
-var dbfile = flag.String("dbfile", "./17monipdb.datx", "db file of 17monipdb.datx path")
-
-var city *datx.City
-var log *logrus.Logger
+var (
+    addr, dbfile string
+    city *datx.City
+)
 
 func init() {
+    flag.StringVar(&addr,   "addr", ":80", "service listen address")
+    flag.StringVar(&dbfile, "dbfile", "./17monipdb.datx", "db file of 17monipdb.datx path")
     flag.Parse()
 
     // initailize logger
-    log = logrus.New()
-    log.SetFormatter(&logrus.TextFormatter{
+    log.SetFormatter(&log.TextFormatter{
         FullTimestamp:   true,
         TimestampFormat: "2006-01-02 15:04:05",
     })
 
     // load dbfile
     var err error
-    if city, err = datx.NewCity(*dbfile); err != nil {
+    if city, err = datx.NewCity(dbfile); err != nil {
         log.Fatal(err)
     }
 }
@@ -59,7 +59,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
     l := &Location{loc.Country, loc.Province, loc.City}
     json.NewEncoder(w).Encode(l)
 
-    log.WithFields(logrus.Fields{
+    log.WithFields(log.Fields{
         "remote": r.RemoteAddr, 
         "country": l.Country,
         "province": l.Province,
@@ -68,5 +68,5 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
     http.HandleFunc("/", Handler)
-    log.Fatal(http.ListenAndServe(*addr, nil))
+    log.Fatal(http.ListenAndServe(addr, nil))
 }
